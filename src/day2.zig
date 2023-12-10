@@ -33,7 +33,7 @@ fn parseInt(reader: std.io.AnyReader) !i32 {
     return result;
 }
 
-pub fn day2() !void {
+pub fn day() !void {
 
     const inputFile = try std.fs.cwd().openFile("day2.txt", .{});
     defer inputFile.close();

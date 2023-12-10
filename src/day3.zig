@@ -78,7 +78,7 @@ fn sumNumbers(previousLine: []u8, currentLine: []u8, nextLine: []u8,
     return sum;
 }
 
-pub fn day3() !void {
+pub fn day() !void {
 
     const inputFile = try std.fs.cwd().openFile("day3.txt", .{});
     defer inputFile.close();

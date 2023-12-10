@@ -33,7 +33,7 @@ fn RollingHashMatcher(comptime needle: [] const u8) type {
     };
 }
 
-pub fn day1() !void {
+pub fn day() !void {
 
     const inputFile = try std.fs.cwd().openFile("day1.txt", .{});
     defer inputFile.close();

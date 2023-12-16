@@ -122,8 +122,20 @@ pub fn endOfLine(self: *@This()) bool {
 
 // Returns a decimal number or null if the current character is not a digit
 pub fn maybeNumber(self: *@This()) ?u32 {
+    return self.maybeParseNumber(u32);
+}
+
+pub fn maybeParseNumber(self: *@This(), comptime Int: type) ?Int {
     if (self.ignoreWhitespace) self.skipWhitespace();
-    var result: ?u32 = null;
+    var negative: bool = false;
+    if (@typeInfo(Int).Int.signedness == .signed) {
+        if ((self.peek() orelse return null) == '-') {
+            self.nextReadIndex += 1;
+            negative = true;
+        }
+    }
+
+    var result: ?Int = null;
 
     while (self.peek()) |c| {
         if (c >= '0' and c <= '9') {
@@ -132,11 +144,27 @@ pub fn maybeNumber(self: *@This()) ?u32 {
         } else break;
     }
 
+    if (@typeInfo(Int).Int.signedness == .signed and negative) {
+        if (result) |r| {
+            return -r;
+        } else {
+            self.nextReadIndex -= 1;
+            return null;
+        }
+    }
     return result;
 }
 
 pub fn number(self: *@This()) u32 {
     if (self.maybeNumber()) |n| {
+        return n;
+    }
+    std.debug.panic("Expected number, got {?s}", .{ self.available(10) });
+}
+
+
+pub fn parseNumber(self: *@This(), comptime Int: type) Int {
+    if (self.maybeParseNumber(Int)) |n| {
         return n;
     }
     std.debug.panic("Expected number, got {?s}", .{ self.available(10) });

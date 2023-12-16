@@ -2,19 +2,19 @@ const std = @import("std");
 const Parser = @import("Parser.zig");
 
 const Card = enum(u4) {
-    _2 = 0,
-    _3 = 1,
-    _4 = 2,
-    _5 = 3,
-    _6 = 4,
-    _7 = 5,
-    _8 = 6,
-    _9 = 7,
-    _T = 8,
-    _J = 9,
-    _Q = 10,
-    _K = 11,
-    _A = 12,
+    _J,// Joker
+    _2,
+    _3,
+    _4,
+    _5,
+    _6,
+    _7,
+    _8,
+    _9,
+    _T,
+    _Q,
+    _K,
+    _A,
 };
 
 const HandType = enum(u3) {
@@ -86,19 +86,35 @@ pub fn day() !void {
         hand.bid = p.number();
 
         // Compute hand type
+        // Remove jokers from histogram considerations
+        const jokers = histogramArray[@intFromEnum(Card._J)];
+        histogramArray[@intFromEnum(Card._J)] = 0;
+
         const histogram: @Vector(13, u3) = histogramArray;
-        hand.type = switch (@reduce(.Max, histogram)) {
+        // How many times the most frequent card occurs
+        const max = @reduce(.Max, histogram);
+        // How many times the least frequent card occurs, ignoring cards that don't occur at all
+        const min = @reduce(std.builtin.ReduceOp.Min, histogram -% @as(@TypeOf(histogram), @splat(1))) +% 1;
+
+        const twosCount = @reduce(.Add, @select(u3, histogram == @as(@TypeOf(histogram), @splat(2)), @as(@TypeOf(histogram), @splat(1)), @as(@TypeOf(histogram), @splat(0))));
+
+        // 1 joker and 4 different cards: pair
+        // 1 joker and 2+1+1 = 3oak
+        // 1 joker and 2+2 = full house
+        // 1 joker and 3+1 = 4oak
+        // 1 joker and 4 = 5oak
+        // 2 joker and 1+1+1: 3oak
+        // 2 joker and 2+1: 4oak
+        // 2 joker and 3: 5oak
+        // 3 joker and 1+1: 4oak
+        // 3 joker and 2: 5oak
+        // 4 joker and 1: 5oak
+        // 5 joker: 5oak
+        hand.type = switch (max + jokers) {
             5 => .FiveOfAKind,
             4 => .FourOfAKind,
-            3 => if (@reduce(std.builtin.ReduceOp.Min, histogram -% @as(@TypeOf(histogram), @splat(1))) == 1) .FullHouse else .ThreeOfAKind,
-            2 =>
-                // Differentiating between two pair and one pair is tricky.
-                // two pair has: 0 (few times), 2, 2, 1
-                // one pair has: 0 (few times), 2, 1, 1, 1
-                // XOR (10, 10, 01, 0...) = 01
-                // XOR (10, 01, 01, 01, 0...) = 11
-                if (@reduce(std.builtin.ReduceOp.Xor, histogram) == 3) .OnePair else .TwoPair
-            ,
+            3 => if (min == 2) .FullHouse else .ThreeOfAKind,
+            2 => if (twosCount == 2) .TwoPair else .OnePair,
             1 => .HighCard,
             else => undefined,
         };

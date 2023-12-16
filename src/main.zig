@@ -7,6 +7,7 @@ pub fn main() !void {
         @import("./day3.zig"),
         @import("./day4.zig"),
         @import("./day5.zig"),
+        @import("./day6.zig"),
     }, 1..) |day, dayNumber| {
         var timer = std.time.Timer.start() catch @panic("need timer to work");
         const startTime = timer.read();

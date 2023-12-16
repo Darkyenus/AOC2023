@@ -1,7 +1,7 @@
 const std = @import("std");
-const Parser = @import("Parser.zig");
+const aoc = @import("aoc.zig");
 
 
 pub fn day() !void {
-    var p = try Parser.parse("dayN.txt");
+    var p = try aoc.Parser.parse("dayN.txt");
 }

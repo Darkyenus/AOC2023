@@ -25,3 +25,20 @@ const FailAllocatorVTable: std.mem.Allocator.VTable = .{
     .free = std.mem.Allocator.noFree
 };
 const FailAllocator: std.mem.Allocator = .{ .ptr = @constCast(&FailAllocatorVTable), .vtable = &FailAllocatorVTable };
+
+
+pub fn gcd(comptime Int: type, a: Int, b: Int) Int {
+    var high = @max(a, b);
+    var low = @min(a, b);
+    while (0 != low) {
+        const newHigh = low;
+        const newLow = high % low;
+        high = newHigh;
+        low = newLow;
+    }
+    return high;
+}
+
+pub fn lcm(comptime Int: type, a: Int, b: Int) Int {
+    return a * (b / gcd(Int, a, b));
+}

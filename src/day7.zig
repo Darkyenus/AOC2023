@@ -126,7 +126,7 @@ pub fn day() !void {
 
     var totalWinnings: u32 = 0;
     for (hands[0..handCount], 1..) |hand, rank| {
-        std.debug.print("{:>5}: {}\n", .{rank, hand});
+        //std.debug.print("{:>5}: {}\n", .{rank, hand});
 
         totalWinnings += @intCast(hand.bid * rank);
     }

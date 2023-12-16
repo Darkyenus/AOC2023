@@ -56,6 +56,16 @@ pub fn next(self: *@This()) ?u8 {
     return null;
 }
 
+// Reads few characters, if available
+pub fn nextFew(self: *@This(), comptime amount: u32) ?*const [amount] u8 {
+    if (self.available(amount)) |b| {
+        self.nextReadIndex += amount;
+        return b[0..amount];
+    }
+
+    return null;
+}
+
 // Peeks one characters, if available
 pub fn peek(self: *@This()) ?u8 {
     if (self.available(1)) |b| {

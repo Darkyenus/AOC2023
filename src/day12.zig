@@ -32,14 +32,21 @@ pub fn day() !void {
     var combinationSum: u32 = 0;
 
     while (!p.endOfFile()) {
-        var lineBuffer: [256]u8 = undefined;
+        var lineBuffer: [512]u8 = undefined;
         const lineTmp = p.until(' ');
         @memcpy(lineBuffer[0..lineTmp.len], lineTmp);
-        const line = lineBuffer[0..lineTmp.len];
+        var lineLen: usize = lineTmp.len;
+        for (1..5) |_| {
+            lineBuffer[lineLen] = '?';
+            lineLen += 1;
+            @memcpy(lineBuffer[lineLen.. lineLen + lineTmp.len], lineTmp);
+            lineLen += lineTmp.len;
+        }
+        const line = lineBuffer[0..lineLen];
 
         p.skipWhitespace();
 
-        var numbersBuffer: [32]u32 = undefined;
+        var numbersBuffer: [128]u32 = undefined;
         var numberCount: u32 = 1;
         numbersBuffer[0] = p.number();
         while (p.peek() == ',') {
@@ -47,7 +54,10 @@ pub fn day() !void {
             numbersBuffer[numberCount] = p.number();
             numberCount += 1;
         }
-        const numbers = numbersBuffer[0..numberCount];
+        for (1..5) |repeat| {
+            @memcpy(numbersBuffer[repeat * numberCount .. repeat * numberCount + numberCount], numbersBuffer[0..numberCount]);
+        }
+        const numbers = numbersBuffer[0..numberCount * 5];
 
         _ = p.endOfLine();
 
@@ -57,6 +67,5 @@ pub fn day() !void {
         combinationSum += c;
     }
 
-    // 8725 too high
     std.debug.print("Day 12: {}\n", .{combinationSum});
 }

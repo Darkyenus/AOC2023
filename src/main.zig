@@ -13,6 +13,7 @@ pub fn main() !void {
         @import("./day9.zig"),
         @import("./day10.zig"),
         @import("./day11.zig"),
+        @import("./day12.zig"),
     }, 1..) |day, dayNumber| {
         var timer = std.time.Timer.start() catch @panic("need timer to work");
         const startTime = timer.read();

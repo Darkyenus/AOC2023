@@ -1,7 +1,16 @@
 const std = @import("std");
 const aoc = @import("aoc.zig");
 
-fn combinations(chars: []const u8, numbers: []const u32) u32 {
+
+const DPCache = [50][200]u64;
+fn combinationsDP(chars: []const u8, numbers: []const u32, cache: *DPCache) u64 {
+    const c = &cache[numbers.len][chars.len];
+    if (c.* == 0) {
+        c.* = 1 + combinations(chars, numbers, cache);
+    }
+    return c.* - 1;
+}
+fn combinations(chars: []const u8, numbers: []const u32, cache: *DPCache) u64 {
     if (numbers.len <= 0){
         if (std.mem.indexOfScalar(u8, chars, '#') == null) return 1;
         return 0;
@@ -15,12 +24,12 @@ fn combinations(chars: []const u8, numbers: []const u32) u32 {
     } else true;
     const canFitNegativelyHere = if (number < chars.len) chars[number] != '#' else true;
 
-    var result: u32 = 0;
+    var result: u64 = 0;
     if (canFitPositivelyHere and canFitNegativelyHere) {
-        result += combinations(chars[@min(number + 1, chars.len)..], numbers[1..]);
+        result += combinationsDP(chars[@min(number + 1, chars.len)..], numbers[1..], cache);
     }
     if (chars[0] != '#') {
-        result += combinations(chars[1..], numbers);
+        result += combinationsDP(chars[1..], numbers, cache);
     }
 
     return result;
@@ -29,7 +38,7 @@ fn combinations(chars: []const u8, numbers: []const u32) u32 {
 pub fn day() !void {
     var p = try aoc.Parser.parse("day12.txt");
 
-    var combinationSum: u32 = 0;
+    var combinationSum: u64 = 0;
 
     while (!p.endOfFile()) {
         var lineBuffer: [512]u8 = undefined;
@@ -61,8 +70,9 @@ pub fn day() !void {
 
         _ = p.endOfLine();
 
-        const c = combinations(line, numbers);
-        std.debug.print("{s} {any} = {}\n", .{ line, numbers, c });
+        var cache : DPCache = std.mem.zeroes(DPCache);
+        const c = combinations(line, numbers, &cache);
+        //std.debug.print("{s} {any} = {}\n", .{ line, numbers, c });
 
         combinationSum += c;
     }

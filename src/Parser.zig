@@ -194,6 +194,29 @@ pub fn until(self: *@This(), ch: u8) []const u8 {
 }
 
 // Returns a substring of the input starting from the current position
+// and ending where `ch` is found or until the end if not found
+pub fn untilEndOfLineOr(self: *@This(), ch: u8) []const u8 {
+    if (self.ignoreWhitespace) self.skipWhitespace();
+    var av = self.available(1) orelse return &[0]u8{};
+    if (std.mem.indexOfAny(u8, av, &[3]u8{ch, '\n', '\r'})) |i| {
+        self.nextReadIndex += i;
+        return av[0..i];
+    }
+    if (self.available(av.len + 1)) |av2| {
+        if (std.mem.indexOfAny(u8, av2, &[3]u8{ch, '\n', '\r'})) |i| {
+            self.nextReadIndex += i;
+            return av2[0..i];
+        }
+        av = av2;
+    }
+    if (self.eof) {
+        self.nextReadIndex += av.len;
+        return av;
+    }
+    std.debug.panic("Buffer is not large enough, separator '{}' did not appear within {} bytes", .{ ch, av.len });
+}
+
+// Returns a substring of the input starting from the current position
 // and ending just before line separator or until the end if not found
 pub fn untilEndOfLine(self: *@This()) []const u8 {
     if (self.ignoreWhitespace) self.skipWhitespace();
